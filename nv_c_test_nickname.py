@@ -66,9 +66,6 @@ class JitsiBot(QObject):
     def setup_driver(self):
         options = Options()
         options.add_argument("--mute-audio")
-        # 새로운 방식 (O) -> 완전히 백그라운드에서 실행됨
-        options.add_argument('--headless')
-        
         try:
             current_filename = os.path.basename(sys.argv[0])
             # unheadless가 파일명에 '없을 때만' headless 추가
