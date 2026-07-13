@@ -250,7 +250,7 @@ class ChatUI(QMainWindow):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
-        self.ver = "Tlk.io Remote v4.3_"
+        self.ver = "Tlk.io Remote v4.4_"
         self.commands = ["/re", "/clear", "/help", "/h",'/restart']
         self.init_ui()
         
@@ -401,7 +401,7 @@ class ChatUI(QMainWindow):
                         border: 1px solid rgba(231, 76, 60, 0.3);
                     }
                 """)
-                self.user_list_label.setText("⚠️ 연결 끊김 또는 인원 없음 (0 Online)")
+                self.user_list_label.setText("⚠️ 연결 끊김")
                 
         except Exception as e:
             print(f"라벨 갱신 실패: {e}")
