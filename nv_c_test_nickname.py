@@ -366,7 +366,7 @@ class ChatUI(QMainWindow):
         self.timer.start(1000)
 
     def update_chat(self):
-        # 1. 새 메시지 수집 및 표시
+        # --- 1. 새 메시지 수집 및 출력 (기존 로직 유지) ---
         new_msgs = self.bot.get_new_messages()
         for m in new_msgs:
             chat_html = f"<div style='margin-bottom: 2px; font-size: 10px;'><b style='color: #1a1a1a;'>{m['sender']} :</b> <span style='color: #444444;'>{m['text']}</span></div>"
@@ -376,15 +376,44 @@ class ChatUI(QMainWindow):
             if not self.isActiveWindow() or self.isMinimized():
                 QApplication.alert(self, msecs=0)
                 
-        # 2. [추가] 실시간 온라인 유저 목록 상시 업데이트
-        count, users = self.bot.get_online_users()
-        print(users)
-
-        if count > 0:
-            user_str = " / ".join(users)
-            self.user_list_label.setText(f"👥 {count} Online | {user_str}")
-        else:
-            self.user_list_label.setText("👥 0 Online")
+        # --- 2. [수정] 온라인 인원에 따른 라벨 색상 동적 변경 로직 ---
+        try:
+            count, users = self.bot.get_online_users()
+            
+            if count > 0:
+                # 🔵 인원이 있을 때: 기존 푸른색(#2980b9) 스타일 유지
+                users_str = " / ".join(users)
+                self.user_list_label.setStyleSheet("""
+                    QLabel {
+                        color: #2980b9; font-weight: bold; font-size: 10px; 
+                        background: rgba(255, 255, 255, 0.2); padding: 4px 8px; 
+                        border-radius: 5px; margin-bottom: 3px;
+                    }
+                """)
+                self.user_list_label.setText(f"👥 {count} Online / {users_str}")
+            else:
+                # 🔴 인원이 0명일 때: 붉은색(#e74c3c) 스타일로 변경 및 경고 문구 출력
+                self.user_list_label.setStyleSheet("""
+                    QLabel {
+                        color: #e74c3c; font-weight: bold; font-size: 10px; 
+                        background: rgba(231, 76, 60, 0.15); padding: 4px 8px; 
+                        border-radius: 5px; margin-bottom: 3px;
+                        border: 1px solid rgba(231, 76, 60, 0.3);
+                    }
+                """)
+                self.user_list_label.setText("⚠️ 연결 끊김 또는 인원 없음 (0 Online)")
+                
+        except Exception as e:
+            print(f"라벨 갱신 실패: {e}")
+            # 🔴 에러 발생 시에도 안전하게 붉은색 경고 표시
+            self.user_list_label.setStyleSheet("""
+                QLabel {
+                    color: #e74c3c; font-weight: bold; font-size: 10px; 
+                    background: rgba(231, 76, 60, 0.15); padding: 4px 8px; 
+                    border-radius: 5px; margin-bottom: 3px;
+                }
+            """)
+            self.user_list_label.setText("⚠️ 연결 상태 확인 불가")
 
     def handle_send(self):
         text = self.input.text().strip()
