@@ -19,15 +19,26 @@ class InitWorker(QThread):
     finished = pyqtSignal()
     status_msg = pyqtSignal(str)
 
-    def __init__(self, bot):
+    def __init__(self, bot ,restart=False):
         super().__init__()
         self.bot = bot
+        self.restart = restart
 
     def run(self):
-        self.status_msg.emit(" (연결 중...)")
-        self.bot.setup_driver()
-        self.status_msg.emit(" (연결됨)")
-        self.finished.emit()
+        try:
+            if self.restart:
+                self.status_msg.emit(" (재시작 중...)")
+                self.bot.restart_driver()
+            else:
+                self.status_msg.emit(" (연결 중...)")
+                self.bot.setup_driver()
+
+                self.status_msg.emit(" (연결됨)")
+                self.finished.emit()
+
+        except Exception as e:
+            self.status_msg.emit(" (연결 실패)")
+            print(f"드라이버 작업 실패: {e}")
 
 # --- 2. Selenium 엔진 클래스 (tlk.io 맞춤 수정) ---
 class JitsiBot(QObject):
@@ -386,7 +397,7 @@ class ChatUI(QMainWindow):
                             self.worker.wait()
 
                         # 3. InitWorker 스레드를 다시 활용하여 백그라운드에서 restart_driver 가동
-                        self.worker = InitWorker(self.bot)
+                        self.worker = InitWorker(self.bot ,restart=True)
                         self.worker.status_msg.connect(self.update_status_label)
                         self.worker.finished.connect(self.on_init_finished)
                         self.worker.start()
