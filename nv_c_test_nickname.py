@@ -33,8 +33,8 @@ class InitWorker(QThread):
                 self.status_msg.emit(" (연결 중...)")
                 self.bot.setup_driver()
 
-                self.status_msg.emit(" (연결됨)")
-                self.finished.emit()
+            self.status_msg.emit(" (연결됨)")
+            self.finished.emit()
 
         except Exception as e:
             self.status_msg.emit(" (연결 실패)")
